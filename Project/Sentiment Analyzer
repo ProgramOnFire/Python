@@ -1,0 +1,43 @@
+def strip_punc(x):
+    for i in punctuation_chars:
+        x=x.replace(i,"")
+    return x
+def get_neg(x):
+    y=x.lower().split()
+    c=0
+    for i in y:
+         if strip_punc(i) in negative_words:
+                c+=1
+    return c
+def get_pos(x):
+    y=x.lower()
+    c=0
+    for i in y.split():
+        if strip_punc(i) in positive_words:
+            c+=1
+    return c
+punctuation_chars = ["'", '"', ",", ".", "!", ":", ";", '#', '@']
+# lists of words to use
+positive_words = []
+with open("positive_words.txt") as pos_f:
+    for lin in pos_f:
+        if lin[0] != ';' and lin[0] != '\n':
+            positive_words.append(lin.strip())
+
+
+negative_words = []
+with open("negative_words.txt") as pos_f:
+    for lin in pos_f:
+        if lin[0] != ';' and lin[0] != '\n':
+            negative_words.append(lin.strip())
+with open('project_twitter_data.csv','r') as test:
+    with open('resulting_data.csv','w') as test2:
+        test2.write('Number of Retweets, Number of Replies, Positive Score, Negative Score, Net Score\n')
+        for i in test.readlines()[1:]:
+            lst=i.split(',')
+            NoRetweets=int(lst[1])
+            NoReplies=int(lst[2].rstrip())
+            PoScore=get_pos(lst[0])
+            NeScore=get_neg(lst[0])
+            NetScore=PoScore-NeScore
+            test2.write(str(NoRetweets)+","+str(NoReplies)+","+str(PoScore)+","+str(NeScore)+","+str(NetScore)+"\n")
