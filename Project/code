@@ -1,0 +1,33 @@
+import requests_with_caching
+def get_movies_from_tastedive(movie_name):
+    movie=requests_with_caching.get("https://tastedive.com/api/similar",params={"q":movie_name,"type":"movies","limit":5})
+    dic=movie.json()
+    return dic
+def extract_movie_titles(movie):
+    movie_list=[]
+    for item in movie['Similar']['Results']:
+        movie_list.append(item['Name'])
+    return movie_list
+def get_related_titles(lst):
+    lst2=[]
+    for i in lst:
+        lst1=extract_movie_titles(get_movies_from_tastedive(i))
+        for j in lst1:
+            if j not in lst2:
+                lst2.append(j)
+    return lst2
+def get_movie_data(string):
+    data = requests_with_caching.get("http://www.omdbapi.com/",params={'t':string,'r':"json"})
+    return data.json()
+def get_movie_rating(dict):
+    for i in dict['Ratings']:
+        if 'Rotten Tomatoes' in i['Source']:
+            return int(i['Value'].strip('%'))
+    return 0
+def rating(x):
+    return -get_movie_rating(get_movie_data(x))
+def get_sorted_recommendations(lst):
+    recom_list=[]
+    recom_list=get_related_titles(lst)
+    return sorted(recom_list,key=rating)
+get_sorted_recommendations(["Bridesmaids", "Sherlock Holmes"])
